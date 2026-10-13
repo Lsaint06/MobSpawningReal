@@ -18,47 +18,33 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class RuleManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final AtomicReference<List<MobRule>> RULES = new AtomicReference<>(List.of());
+    private static final AtomicReference<RuleCatalog> CATALOG = new AtomicReference<>(new RuleCatalog(List.of(), List.of(), List.of()));
+    private static volatile long revision;
     private static final Path RULE_DIR = FMLPaths.CONFIGDIR.get().resolve(MobSpawningReal.MOD_ID).resolve("rules");
 
     private RuleManager() {}
 
-    public static List<MobRule> rules() { return RULES.get(); }
+    public static List<MobRule> rules() { return CATALOG.get().rules(); }
+    public static RuleCatalog catalog() { return CATALOG.get(); }
+    public static long revision() { return revision; }
     public static Path ruleDirectory() { return RULE_DIR; }
 
-    public static LoadResult reload() {
-        List<String> errors = new ArrayList<>();
-        List<MobRule> loaded = new ArrayList<>();
+    public static synchronized LoadResult reload() {
+        RuleCatalog catalog;
         try {
             Files.createDirectories(RULE_DIR);
             ensureExample();
-            try (var stream = Files.list(RULE_DIR)) {
-                for (Path path : stream.filter(p -> p.getFileName().toString().endsWith(".json")).sorted().toList()) {
-                    try (Reader reader = Files.newBufferedReader(path)) {
-                        MobRule[] rules = GSON.fromJson(reader, MobRule[].class);
-                        if (rules == null) continue;
-                        for (MobRule rule : rules) {
-                            if (rule == null) continue;
-                            rule.normalize();
-                            List<String> ruleErrors = RuleValidator.validate(rule);
-                            if (ruleErrors.isEmpty()) loaded.add(rule);
-                            else ruleErrors.forEach(e -> errors.add(path.getFileName() + " :: " + rule.id + " :: " + e));
-                        }
-                    } catch (Exception e) {
-                        errors.add(path.getFileName() + " :: " + e.getMessage());
-                    }
-                }
-            }
+            catalog = RuleCatalog.load(RULE_DIR);
         } catch (IOException e) {
-            errors.add("Could not access rule directory: " + e.getMessage());
+            String error = "Could not access rule directory: " + e.getMessage();
+            catalog = new RuleCatalog(List.of(), List.of(new RuleCatalog.Entry("directory", "rules", "Configuration unavailable", null, List.of(error))), List.of(error));
         }
-        List<MobRule> sorted = RuleSemantics.sort(loaded);
-        RULES.set(sorted);
-        MobSpawningReal.LOGGER.info("Loaded {} Mob Spawning Real rules with {} validation errors", sorted.size(), errors.size());
-        errors.forEach(MobSpawningReal.LOGGER::warn);
-        return new LoadResult(sorted.size(), List.copyOf(errors));
+        CATALOG.set(catalog);
+        revision++;
+        MobSpawningReal.LOGGER.info("Loaded {} Mob Spawning Real rules with {} validation errors", catalog.rules().size(), catalog.errors().size());
+        catalog.errors().forEach(MobSpawningReal.LOGGER::warn);
+        return new LoadResult(catalog.rules().size(), catalog.errors());
     }
-
     private static void ensureExample() throws IOException {
         Path example = RULE_DIR.resolve("00-example.disabled.json");
         if (Files.exists(example)) return;
@@ -69,3 +55,4 @@ public final class RuleManager {
 
     public record LoadResult(int loaded, List<String> errors) {}
 }
+

@@ -73,7 +73,8 @@ public final class MobControlCommands {
     }
 
     private static int setGlobal(CommandSourceStack source, boolean enabled) {
-        RuntimeControl.setGloballyEnabled(enabled);
+        var saved = RuntimeControl.setGloballyEnabled(enabled);
+        if (!saved.success()) { source.sendFailure(Component.literal(saved.message())); return 0; }
         source.sendSuccess(() -> Component.literal("Mob Spawning Real is now " + (enabled ? "ENABLED" : "DISABLED") + ". This state will persist across server restarts."), true);
         return 1;
     }
@@ -90,7 +91,8 @@ public final class MobControlCommands {
             source.sendFailure(Component.literal("Unknown rule id: " + ruleId));
             return 0;
         }
-        RuntimeControl.setRuleEnabled(rule.id, enabled);
+        var saved = RuntimeControl.setRuleEnabled(rule.id, enabled);
+        if (!saved.success()) { source.sendFailure(Component.literal(saved.message())); return 0; }
         source.sendSuccess(() -> Component.literal("Rule '" + rule.id + "' is now " + (enabled ? "ENABLED" : "DISABLED") + " by runtime override. This persists across restarts."), true);
         return 1;
     }
@@ -101,7 +103,8 @@ public final class MobControlCommands {
             source.sendFailure(Component.literal("Unknown rule id: " + ruleId));
             return 0;
         }
-        RuntimeControl.clearRuleOverride(rule.id);
+        var saved = RuntimeControl.clearRuleOverride(rule.id);
+        if (!saved.success()) { source.sendFailure(Component.literal(saved.message())); return 0; }
         source.sendSuccess(() -> Component.literal("Cleared runtime override for '" + rule.id + "'. It now follows enabled=" + rule.enabled + " from JSON."), true);
         return 1;
     }
