@@ -40,7 +40,8 @@
 - [x] Use dark panels, status colors, tooltips, clipping, keyboard focus and explicit loading/error states.
 ### 5. Verification and delivery
 - [x] Compile, test, build; dedicated server smoke test; independent review and fixes.
-- [x] Update docs/manual checklist, commit and push feature branch, link exact built JAR.
+- [x] Update docs/manual checklist and commit feature branch; build exact installable JAR.
+- [ ] Push feature branch to GitHub (blocked by GitHub write authorization).
 
 ## Execution ledger
 Ruling: user explicitly requests continuing through implementation without a design-document stop; execute inline using this plan and their supplied spec.
@@ -52,3 +53,5 @@ All six user-specified stages implemented inline. Java 25 compilation, full buil
 Ruling: editor writes require atomic replacement; if unsupported, fail with the original intact instead of using a risky non-atomic fallback.
 Ruling: entityTags/biomeTags are preserved but not presented as working settings because the current matcher ignores them. Full-file malformed JSON and oversized rule objects require manual editing. Those limitations and unperformed visual/gameplay/multiplayer checks are explicit in docs/VISUAL_EDITOR.md and docs/DASHBOARD_TESTING.md.
 Ruling: use the existing checkout on the requested new branch; main remains untouched. Reuse the ignored local TEMP build override because OneDrive prevents reliable Gradle output cleanup.
+
+Delivery: feature implementation committed as 0bffc33. Git push rejected with HTTP 403 because local Git authenticates as yukonwarrior without write permission. The connected account is Lsaint06, but GitHub create-tree also returned 403 Resource not accessible by integration. No remote branch was created. Publishing requires fixing Git credentials or granting the installed integration repository Contents write permission. No main changes or merges occurred.
