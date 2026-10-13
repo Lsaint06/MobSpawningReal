@@ -1,28 +1,33 @@
-# Dashboard testing
+# Visual editor testing (1.4.0)
 
-## Installation
+Use Java 25, Minecraft 26.2 and NeoForge 26.2.0.7-beta. Install mobspawningreal-1.4.0.jar on client and server, removing older copies. Back up the test config. No resource pack is required.
 
-Use Java 25, Minecraft 26.2 and NeoForge 26.2.0.7-beta. Put `mobspawningreal-1.3.0.jar` into both client and dedicated-server `mods` folders, removing the older mod jar. Keep your existing configuration. Start a test world/server and run `/msrgui` with administrator permissions. No resource pack is needed.
+## Manual Minecraft acceptance checklist
 
-## Manual Minecraft acceptance checks
+These checks are not established by automated tests. Run them in a disposable single-player world, then on a dedicated server with two administrators.
 
-These checks require a running game; compilation and JUnit tests do not establish that they pass.
+1. Open /msrgui with cheats/admin permissions. Check buttons, focus, tooltips, scrolling/dragging, arrow navigation, long text, status colors, loading, Escape/Done and continued world simulation.
+2. Test scaled GUI sizes 320x240, 427x240, 640x360, 800x360 and 1280x720 where feasible. Change GUI scale while open. Compact navigation must expose every section, creation for an unconfigured mob, save/discard and rule management. Wide screens show three regions. Check clipping and modal overlays.
+3. Search vanilla/modded mob names and IDs. Check configured/unconfigured and unrestricted-rule counts, filters/sort, category selection retention, and scroll position after row selection. Verify text/status fallback without entity instantiation.
+4. Select an unconfigured mob, Create Rule, edit ID/priority/enabled/stop-processing and Save Changes. Check the new gui-*.json and the other administrator's view. Duplicate/save, then confirm deletion of only the copy and verify its exact backup.
+5. Edit every spawn/condition/active-spawn field across settings pages. Pick dimensions, biomes, structures, weather and reasons. Compare unset versus explicit 0/false in JSON. Check actual spawning with low limits in a disposable world.
+6. Edit health, damage, speed, scale, armor/custom attributes and a modded attribute ID containing a slash. Test registered bounds and invalid numbers. Check new mobs; do not expect attributes to retroactively update all existing mobs.
+7. Pick vanilla/modded items for all equipment slots. Edit count/chance/drop-on-death, clear a whole slot, save and verify new applicable mobs.
+8. Add/edit/remove loot rows; check ranges, 25% chance stored as 0.25 and vanilla-drop clearing. Verify probabilistic drops across many mobs and preservation of other rows.
+9. Test supported AI targeting, hostility, climbing, breaking/pillaring/planting/eating and cooldowns in safe test environments. Check block pickers and behavior changes on subsequent events for tagged mobs.
+10. Draft a change and navigate categories. Switching rule/mob, creating/duplicating, reloading or closing must warn before discarding. Cancel retains values; confirm/Discard restores saved values. Typing must not write files.
+11. Save competing drafts from two administrators. The stale save must fail with its draft retained. Repeat after runtime commands and external JSON edits. Discard/review/reapply; automatic merging is not provided.
+12. Test rule/global runtime toggles and Use JSON. Overrides must remain separate and take precedence over definition Enabled. Restart and confirm persistence. Pausing must not undo applied equipment/attributes.
+13. Test read-only rule/backup paths and failed writes. Never show success on failure; preserve original bytes and live rules. Restore an exact backup while stopped. Test malformed runtime-state recovery independently.
+14. Introduce duplicate/missing IDs, invalid registry IDs and malformed types (id:{}, enabled:{}, entities:[null]), whole files and non-object entries. Diagnostics must remain available; invalid rules must not run. Repair editable objects; repair whole-file errors manually. Oversized objects must fail clearly.
+15. Non-admin /msrgui must be unavailable. Revoke permission while open: screen closes and further data/mutations are denied. Console /msrgui must show player-only feedback.
+16. Disconnect, change worlds/servers and reopen. Late responses must not reopen closed screens or discard dirty drafts. Interrupt paging; ten-second timeout and explicit Refresh must recover controls and registry data.
+17. Exercise a large modpack/catalog and rapid requests. Check rate limits, unloaded chunks, spawn caps, and absence of per-frame registry scans/disk writes.
 
-1. Single-player: enable cheats, run `/msrgui`, and check opening, Escape/Done closing, switch labels, pending/saved feedback, button sounds and keyboard focus. Tab reaches controls; arrows select rules; Enter toggles the selected rule. The simulation continues while the dashboard is open.
-2. Search by a rule ID, `minecraft:zombie`, a filename and an error phrase. Check empty results, mouse wheel, scrollbar dragging, long names, rule selection and all five summary categories. At narrow GUI widths use Rules/Details navigation. Resize the window and change GUI scale; verify panels, text, scrolling and controls stay usable.
-3. Toggle a valid rule, disable the global switch, and check the individual selection is retained with Paused/Disabled status. Change a rule while globally paused, then resume. Use JSON restores its configured enabled state.
-4. Close and restart the server/world. Confirm saved state is restored. Compare original rule JSON before and after; it should be unchanged. Only `runtime-state.json` contains overrides.
-5. With a configuration backup in a test instance, introduce an invalid rule, malformed JSON file, missing ID, and duplicate IDs. Reload; check red Invalid rows and diagnostics, inactive mutation controls, and valid rules still running. Repair the files and reload again.
-6. Test saving with the runtime-state directory read-only. A failed save must show an error and leave the switch unchanged. Repair permissions and retry. Test malformed runtime state; the file must be preserved, saving blocked, and repair plus Reload should recover.
-7. Dedicated server: connect two administrators with the same mod jar. Both open the dashboard. Change a rule/global state in one client; the other should update. Also change state through `/msr` commands. Simultaneous stale edits must be rejected with current server state rather than overwriting an administrator's newer decision.
-8. Join as a non-admin: `/msrgui` must be unavailable. Revoke an administrator's permission while their screen is open; the screen should close and further requests must not mutate configuration. Try `/msrgui` from the console; expect a player-only message.
-9. Disconnect/reconnect or switch worlds with the screen open. Check that old snapshots never reopen it and that the next session displays the current server's state.
-10. Use many rules and large summaries to exercise paging and scrolling. Repeat Reload quickly; expect a brief rate-limit message. Interrupt a response; after ten seconds Refresh should recover interaction.
+## Automated verification performed
 
-## Automated verification
+October 13, 2026: Java 25 compileJava, test and build passed with **55 tests, zero failures**, including all 38 v1.3 tests. New tests cover targeted CRUD, duplicate IDs including oversized siblings, strict JSON/types, unique draft IDs, unknown/unrelated preservation, failed backup writes, exact backup recovery, no-op saves, restart persistence, competing drafts, validator rejection, list/path/unset semantics and real schema coverage. Existing tests cover pure permission/revision policy and bounded Unicode paging. They do not prove connected-client permissions or gameplay.
 
-Run `gradlew.bat compileJava test build` with Java 25. Tests use temporary directories and do not edit real rule files. Their scope includes JSON loading and source identity, duplicate rejection, strict state parsing, persistence round trips/failure, global-independent overrides, permission/revision/identity policy, search, screen layout bounds, complete snapshot assembly, and Unicode-safe paging. Dedicated-server startup and actual client-server/game-thread behavior need separate runtime verification.
+An isolated dedicated server loaded 1.4.0, reached a loaded world, executed status/global disable-enable/rule override/list/reload, rejected console /msrgui, and stopped cleanly. This validates bootstrap and retained commands, not live editor sessions or picker interaction.
 
-For this development checkout, OneDrive marked generated output directories read-only, preventing repeated Gradle cleanup. Verification used an ignored local Gradle init script to direct build output to a temporary directory; normal project build configuration was preserved.
-
-Development verification on October 13, 2026: `compileJava`, `test`, and `build` succeeded with **38 tests, zero failures**. An isolated localhost dedicated server loaded the mod, reached `Done`, executed global disable/enable, a persistent rule override, list and reload commands, rejected console `/msrgui` with its player-only message, and stopped cleanly. This validates server bootstrap and command integration; it does not establish live GUI or two-client behavior. The automated console harness waits until the world is loaded before submitting commands.
+OneDrive locked generated outputs in this checkout. An ignored init script redirected Gradle outputs to the temporary mobspawningreal-dashboard-build directory; normal project build settings remain unchanged. The installable JAR was copied to build/libs/mobspawningreal-1.4.0.jar. Live GUI rendering, multiplayer interaction, and gameplay are still unverified.

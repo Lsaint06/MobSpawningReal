@@ -2,22 +2,24 @@
 
 Universal rule-driven mob spawning, attributes, equipment, loot and AI control for Minecraft **26.2**, NeoForge **26.2.0.7-beta**, and **Java 25**.
 
-## In-game dashboard
+## Visual mob editor (1.4.0)
 
 Install the same mod version on the client and server. Join as an administrator (or enable cheats in single-player) and run **`/msrgui`**.
 
 - Search rules by ID, mob, filename or validation error; scroll and select a rule.
 - Toggle rules individually or pause/resume all processing with **Mod: ON/OFF**.
-- Inspect Spawn Settings, Attributes, Equipment, Loot and AI Behaviors. These categories are read-only in version one; rule creation and field editing are future extensions.
+- Browse registered vanilla and compatible modded mobs; search by translated name or registry ID and filter configured/unconfigured mobs.
+- Create, duplicate, edit and delete individual rules. Changes remain in a draft until **Save Changes**; **Discard** restores saved values. Leaving a dirty draft requires confirmation.
+- Edit Spawn Settings, Attributes, Equipment, Loot and AI Behaviors with numeric fields, toggles, searchable registry pickers, and settings pages for advanced fields. Blank/Unset differs from explicit zero or false.
 - Use **Use JSON** to clear a selected rule's runtime override.
 - **Reload** reads server rules and saved runtime state; **Refresh** fetches current server state.
 - Changes become visible after server confirmation and are synchronized with other open dashboards, including changes from existing `/msr` commands.
 
-Settings are saved in `config/mobspawningreal/runtime-state.json`. Rule files under `config/mobspawningreal/rules/` are preserved. Invalid entries remain visible with diagnostics and cannot execute or be force-enabled. Duplicate IDs are rejected for every conflicting rule; give each rule a unique ID. A malformed runtime-state file is preserved and blocks saving until repaired and reloaded.
+Runtime switches are saved in `config/mobspawningreal/runtime-state.json`. Definition edits are saved under `config/mobspawningreal/rules/`; unknown properties and unrelated entries survive. Existing-file edits/deletions create exact original backups under `rules/backups/` and require atomic replacement support. Conflicting server revisions or changed file fingerprints reject the save and retain the draft. Unchanged definitions are not rewritten. Invalid entries remain visible in Diagnostics and cannot execute or be force-enabled.
 
 Disabling processing stops future runtime actions. Attributes and equipment already applied to existing mobs are not undone. Global pause preserves individual rule settings.
 
-See [configuration reference](docs/CONFIG.md) and [dashboard testing checklist](docs/DASHBOARD_TESTING.md).
+See [visual editor guide](docs/VISUAL_EDITOR.md), [configuration reference](docs/CONFIG.md), and [testing checklist](docs/DASHBOARD_TESTING.md).
 
 ## Building
 
