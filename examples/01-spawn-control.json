@@ -1,0 +1,26 @@
+[
+  {
+    "id": "block_creepers_in_overworld_plains",
+    "enabled": true,
+    "priority": 100,
+    "when": {
+      "entities": ["minecraft:creeper"],
+      "dimensions": ["minecraft:overworld"],
+      "biomes": ["minecraft:plains"]
+    },
+    "then": {"spawn": {"allow": false}}
+  },
+  {
+    "id": "triple_night_zombies",
+    "enabled": true,
+    "priority": 50,
+    "when": {
+      "entities": ["minecraft:zombie"],
+      "time": {"start": 13000, "end": 23000},
+      "light": {"max": 7}
+    },
+    "then": {
+      "spawn": {"allow": true, "rateMultiplier": 3.0, "maxPerMob": 60, "capRadius": 64}
+    }
+  }
+]

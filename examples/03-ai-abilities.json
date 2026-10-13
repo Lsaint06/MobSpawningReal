@@ -1,0 +1,22 @@
+[
+  {
+    "id": "siege_zombies",
+    "enabled": true,
+    "priority": 100,
+    "when": {"entities": ["minecraft:zombie"]},
+    "then": {
+      "behavior": {
+        "alwaysHostile": true,
+        "hostileWhenHurt": true,
+        "alertOthersWhenHurt": true,
+        "knockbackTakenMultiplier": 1.5,
+        "climb": true,
+        "breakBlocks": true,
+        "blockBreakHardnessMax": 2.0,
+        "pillarUp": true,
+        "pillarBlock": "minecraft:cobblestone",
+        "abilityCooldownTicks": 20
+      }
+    }
+  }
+]

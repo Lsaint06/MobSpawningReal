@@ -1,0 +1,21 @@
+[
+  {
+    "id": "elite_skeleton",
+    "enabled": true,
+    "priority": 100,
+    "when": {"entities": ["minecraft:skeleton"], "chance": 0.15},
+    "then": {
+      "attributes": {"maxHealth": 35, "movementSpeed": 0.30, "followRange": 48, "scale": 1.1},
+      "name": {"text": "Elite Skeleton", "alwaysVisible": true},
+      "equipment": {
+        "mainhand": {"item": "minecraft:bow", "chance": 1.0, "dropOnDeath": false},
+        "head": {"item": "minecraft:iron_helmet", "chance": 1.0, "dropOnDeath": false}
+      },
+      "loot": {
+        "clearVanilla": false,
+        "add": [{"item": "minecraft:emerald", "min": 1, "max": 2, "chance": 0.25}]
+      },
+      "outgoingDamage": 8.0
+    }
+  }
+]

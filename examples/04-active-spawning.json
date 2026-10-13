@@ -1,0 +1,30 @@
+[
+  {
+    "id": "active_zombie_zone",
+    "enabled": false,
+    "priority": 100,
+    "when": {
+      "entities": ["minecraft:zombie"],
+      "dimensions": ["minecraft:overworld"],
+      "time": {"start": 13000, "end": 23000},
+      "light": {"max": 7}
+    },
+    "then": {
+      "activeSpawn": {
+        "enabled": true,
+        "intervalTicks": 20,
+        "attempts": 4,
+        "area": {
+          "minX": -32, "maxX": 32,
+          "minY": 60, "maxY": 80,
+          "minZ": -32, "maxZ": 32
+        },
+        "maxNearby": 20,
+        "capRadius": 64.0,
+        "requireLoadedChunk": true,
+        "requireEmptySpace": true,
+        "requireSolidGround": true
+      }
+    }
+  }
+]
