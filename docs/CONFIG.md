@@ -206,6 +206,8 @@ Notes:
 
 ## Commands
 
+- `/msrgui` — open the in-game administrator rule dashboard (requires the mod on the client).
+
 - `/mobspawningreal reload` or `/msr reload` — reload all JSON rules.
 - `/mobspawningreal validate` — report load/validation errors.
 - `/mobspawningreal list` — list loaded rules and their effective runtime states.
@@ -219,6 +221,8 @@ Notes:
 - `/mobspawningreal rule clear <id>` — clear the runtime override and follow JSON again.
 
 Runtime toggles are stored separately in `config/mobspawningreal/runtime-state.json`; commands do not rewrite your rule JSON files. Global disable stops active spawning, spawn multipliers, loot/behavior hooks, and other new runtime processing. Changes already applied permanently to existing entities (for example equipment or base attributes) are not reversed.
+
+The dashboard offers the same persistent toggles, a searchable rule catalog, retained validation errors, and read-only summaries for Spawn Settings, Attributes, Equipment, Loot, and AI Behaviors. Individual switches remain editable during global pause. **Use JSON** clears a rule override. Saves replace the runtime-state file only after a complete temporary write; failures leave live settings unchanged and report an error. If runtime state is malformed, repair it before using **Reload** to unlock saving. Duplicate IDs, missing IDs, and invalid rules are excluded from runtime execution. Rule IDs are limited to 1024 characters for the bounded dashboard protocol.
 
 ## Example: block one mob in one dimension
 

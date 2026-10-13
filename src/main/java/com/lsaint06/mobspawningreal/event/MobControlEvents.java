@@ -110,6 +110,7 @@ public final class MobControlEvents {
 
     @SubscribeEvent
     public static void serverTick(ServerTickEvent.Post event) {
+        com.lsaint06.mobspawningreal.dashboard.DashboardService.tick(event.getServer());
         if (!RuntimeControl.isGloballyEnabled()) return;
         ActiveSpawnController.tick(event.getServer());
     }
@@ -120,5 +121,21 @@ public final class MobControlEvents {
         if (!(event.getTarget() instanceof Mob mob)) return;
         List<MobRule> rules = RuntimeRuleEngine.appliedRules(mob);
         if (!rules.isEmpty()) LeashController.interact(event, mob, rules);
+    }
+
+    @SubscribeEvent
+    public static void serverStarting(net.neoforged.neoforge.event.server.ServerStartingEvent event) {
+        com.lsaint06.mobspawningreal.dashboard.DashboardService.reset();
+        RuntimeControl.load();
+        com.lsaint06.mobspawningreal.config.RuleManager.reload();
+    }
+    @SubscribeEvent
+    public static void serverStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        com.lsaint06.mobspawningreal.dashboard.DashboardService.reset();
+    }
+    @SubscribeEvent
+    public static void playerLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
+            com.lsaint06.mobspawningreal.dashboard.DashboardService.remove(player);
     }
 }

@@ -32,4 +32,22 @@ class RuntimeStateStoreTest {
         assertFalse(store.update(false, Map.of()).success());
         assertEquals("broken", Files.readString(file));
     }
+    @Test void invalidBooleanTypesAreNotSilentlyCoerced() throws Exception {
+        Path file = directory.resolve("state.json");
+        Files.writeString(file, "{\"enabled\":\"surprise\",\"ruleOverrides\":{}}");
+        var store = new RuntimeStateStore(file);
+        assertFalse(store.load().success());
+        assertFalse(store.update(true, Map.of()).success());
+        assertTrue(Files.readString(file).contains("surprise"));
+    }
+    @Test void failedReloadCannotReplaceLiveStateWithDefaults() throws Exception {
+        Path folder = directory.resolve("state-dir");
+        Path file = folder.resolve("state.json");
+        var store = new RuntimeStateStore(file);
+        assertTrue(store.update(false, Map.of("farm", false)).success());
+        Files.delete(file); Files.delete(folder); Files.writeString(folder, "blocked");
+        assertFalse(store.load().success());
+        assertFalse(store.state().enabled());
+        assertEquals(Map.of("farm", false), store.state().ruleOverrides());
+    }
 }

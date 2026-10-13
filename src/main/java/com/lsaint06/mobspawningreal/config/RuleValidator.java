@@ -12,6 +12,7 @@ public final class RuleValidator {
 
     public static List<String> validate(MobRule r) {
         List<String> errors = new ArrayList<>();
+        validateFinite("rule", new com.google.gson.GsonBuilder().serializeSpecialFloatingPointValues().create().toJsonTree(r), errors);
         if (r.id == null || r.id.isBlank()) errors.add("id must not be blank");
         validateIds("when.entities", r.when.entities, true, errors);
         validateIds("when.dimensions", r.when.dimensions, true, errors);
@@ -72,6 +73,15 @@ public final class RuleValidator {
         validateEquipment(r.then.equipment, errors);
         validateLoot(r.then.loot, errors);
         return errors;
+    }
+
+    private static void validateFinite(String field, com.google.gson.JsonElement value, List<String> errors) {
+        if (value == null || value.isJsonNull()) return;
+        if (value.isJsonObject()) value.getAsJsonObject().entrySet().forEach(e -> validateFinite(field + "." + e.getKey(), e.getValue(), errors));
+        else if (value.isJsonArray()) {
+            int index = 0;
+            for (var child : value.getAsJsonArray()) validateFinite(field + "[" + index++ + "]", child, errors);
+        } else if (value.getAsJsonPrimitive().isNumber() && !Double.isFinite(value.getAsDouble())) errors.add(field + " must be finite");
     }
 
     private static void validateEquipment(EquipmentActions e, List<String> errors) {

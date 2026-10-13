@@ -1,23 +1,17 @@
 package com.lsaint06.mobspawningreal.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.lsaint06.mobspawningreal.MobSpawningReal;
 import com.lsaint06.mobspawningreal.rule.MobRule;
-import com.lsaint06.mobspawningreal.rule.RuleSemantics;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class RuleManager {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicReference<RuleCatalog> CATALOG = new AtomicReference<>(new RuleCatalog(List.of(), List.of(), List.of()));
     private static volatile long revision;
     private static final Path RULE_DIR = FMLPaths.CONFIGDIR.get().resolve(MobSpawningReal.MOD_ID).resolve("rules");

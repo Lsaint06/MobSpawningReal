@@ -22,14 +22,14 @@ public final class RuntimeStateStore {
     public synchronized Result load() {
         loadError = null;
         try {
-            if (!Files.exists(file)) { state = new State(true, Map.of()); return update(true, Map.of()); }
+            if (!Files.exists(file)) return update(true, Map.of());
             try (var reader = Files.newBufferedReader(file)) {
                 JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-                boolean enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
+                boolean enabled = !json.has("enabled") || readBoolean(json.get("enabled"), "enabled");
                 Map<String, Boolean> overrides = new LinkedHashMap<>();
                 if (json.has("ruleOverrides") && !json.get("ruleOverrides").isJsonNull()) {
                     for (var entry : json.getAsJsonObject("ruleOverrides").entrySet()) {
-                        if (!entry.getKey().isBlank() && !entry.getValue().isJsonNull()) overrides.put(entry.getKey().trim(), entry.getValue().getAsBoolean());
+                        if (!entry.getKey().isBlank() && !entry.getValue().isJsonNull()) overrides.put(entry.getKey().trim(), readBoolean(entry.getValue(), "ruleOverrides / " + entry.getKey()));
                     }
                 }
                 state = new State(enabled, overrides);
@@ -39,6 +39,11 @@ public final class RuntimeStateStore {
             loadError = "Cannot read runtime-state.json; repair the file before saving: " + e.getMessage();
             return new Result(false, loadError);
         }
+    }
+    private static boolean readBoolean(JsonElement value, String field) {
+        if (value == null || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean())
+            throw new IllegalArgumentException(field + " must be a boolean");
+        return value.getAsBoolean();
     }
     public synchronized Result update(boolean enabled, Map<String, Boolean> overrides) {
         if (loadError != null) return new Result(false, loadError);

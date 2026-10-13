@@ -27,4 +27,26 @@ class RuleCatalogTest {
         assertFalse(catalog.rules().get(1).enabled);
         assertEquals(json, Files.readString(file));
     }
+    @Test void malformedDuplicateStillDisablesItsValidCounterpart() throws Exception {
+        Files.writeString(directory.resolve("a.json"), "[{\"id\":\"same\"},{\"id\":\"same\",\"priority\":\"bad\"}]");
+        var catalog = RuleCatalog.load(directory);
+        assertTrue(catalog.rules().isEmpty());
+        assertEquals(2, catalog.entries().stream().filter(e -> e.errors().stream().anyMatch(s -> s.contains("Duplicate"))).count());
+    }
+    @Test void nonfiniteNumbersAreInvalidButSafeToDisplay() throws Exception {
+        Files.writeString(directory.resolve("a.json"), "[{\"id\":\"bad\",\"then\":{\"attributes\":{\"maxHealth\":-1,\"movementSpeed\":\"NaN\"}}}]");
+        var catalog = RuleCatalog.load(directory);
+        assertTrue(catalog.rules().isEmpty());
+        assertTrue(catalog.entries().getFirst().errors().stream().anyMatch(s -> s.contains("finite")));
+        var row = com.lsaint06.mobspawningreal.dashboard.RuleSummaries.row(catalog.entries().getFirst(), false, null);
+        assertFalse(row.valid());
+        assertFalse(row.categories().isEmpty());
+    }
+    @Test void diagnosticsShowTheirArrayPosition() throws Exception {
+        Files.writeString(directory.resolve("a.json"), "[null,null]");
+        var catalog = RuleCatalog.load(directory);
+        assertTrue(catalog.errors().getFirst().contains("a.json#0"));
+        var row = com.lsaint06.mobspawningreal.dashboard.RuleSummaries.row(catalog.entries().get(1),false,null);
+        assertTrue(row.source().contains("index 1"));
+    }
 }

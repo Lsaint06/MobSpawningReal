@@ -17,6 +17,7 @@ public final class MobSpawningReal {
     public MobSpawningReal(IEventBus modBus) {
         RuntimeControl.load();
         RuleManager.reload();
+        modBus.addListener(com.lsaint06.mobspawningreal.network.DashboardNetwork::register);
         NeoForge.EVENT_BUS.register(MobControlEvents.class);
     }
 }

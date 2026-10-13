@@ -21,6 +21,14 @@ public final class MobControlCommands {
     private MobControlCommands() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("msrgui")
+                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                .executes(ctx -> {
+                    var player = ctx.getSource().getPlayer();
+                    if (player == null) { ctx.getSource().sendFailure(Component.literal("Open /msrgui as an administrator in Minecraft.")); return 0; }
+                    com.lsaint06.mobspawningreal.dashboard.DashboardService.open(player);
+                    return 1;
+                }));
         dispatcher.register(Commands.literal("mobspawningreal")
             .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
             .then(Commands.literal("reload").executes(ctx -> reload(ctx.getSource())))
